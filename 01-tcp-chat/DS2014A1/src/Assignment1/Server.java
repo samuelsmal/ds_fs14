@@ -107,10 +107,10 @@ class HandleClient implements Runnable {
 		try {
 			// Registering new listener
 			Server.listenerSockets.add(socket);
-			
+
 			out = new BufferedWriter(new OutputStreamWriter(
 					socket.getOutputStream()));
-			
+
 			for (String message : Server.messageStore) {
 				out.write(message);
 				out.newLine();
@@ -127,10 +127,13 @@ class HandleClient implements Runnable {
 			// Producers need not be registered
 			List<BufferedWriter> bufferedWriters = new ArrayList<BufferedWriter>(
 					Server.listenerSockets.size());
-			
-			for (Socket listener : Server.listenerSockets) {
-				bufferedWriters.add(new BufferedWriter(new OutputStreamWriter(
-						listener.getOutputStream())));
+
+			synchronized (this) {
+				for (Socket listener : Server.listenerSockets) {
+					bufferedWriters
+							.add(new BufferedWriter(new OutputStreamWriter(
+									listener.getOutputStream())));
+				}
 			}
 
 			for (String message = in.readLine(); message != null; message = in
